@@ -1,4 +1,4 @@
-rsync command capable of using checksums stored in **trusted** extended attributes
+# **rsync command** capable of using checksums stored in **trusted** extended attributes
 
 This **rsync** command is the standard command but it includes specific code that enables the use of the
 **-c** option (to use checksums instead of size and modification time) to decide whether files should be
