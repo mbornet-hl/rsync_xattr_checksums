@@ -1,0 +1,1 @@
+rsync command capable of using checksums stored in "trusted" extended attributes
