@@ -26,12 +26,11 @@
  * with this program; if not, visit the http://fsf.org website.
  */
 
-#include <config.h>
 #include "rsync.h"
 #ifdef XATTR_SUMS
-#include "md5.h"
-#include "sha256.h"
-#include "sha512.h"
+#include "gnulib/md5.h"
+#include "gnulib/sha256.h"
+#include "gnulib/sha512.h"
 #include "xattr_sums/ai_cpri.h"
 #include "xattr_sums/ai_epri.h"
 #endif
@@ -63,13 +62,25 @@ struct name_num_item valid_checksums_items[] = {
 	{ CSUM_XXH64, 0, "xxh64", NULL },
 	{ CSUM_XXH64, 0, "xxhash", NULL },
 #endif
+#ifdef XATTR_SUMS
+	{ CSUM_MD5, NNI_BUILTIN, "md5", NULL },
+#else
 	{ CSUM_MD5, NNI_BUILTIN|NNI_EVP, "md5", NULL },
+#endif /* XATTR_SUMS */
 	{ CSUM_MD4, NNI_BUILTIN|NNI_EVP, "md4", NULL },
 #ifdef SHA256_DIGEST_LENGTH
+#ifdef XATTR_SUMS
+	{ CSUM_SHA256, 0, "sha256", NULL },
+#else
 	{ CSUM_SHA256, NNI_EVP, "sha256", NULL },
+#endif /* XATTR_SUMS */
 #endif
 #ifdef SHA512_DIGEST_LENGTH
+#ifdef XATTR_SUMS
+	{ CSUM_SHA512, 0, "sha512", NULL },
+#else
 	{ CSUM_SHA512, NNI_EVP, "sha512", NULL },
+#endif /* XATTR_SUMS */
 #endif
 #ifdef SHA_DIGEST_LENGTH
 	{ CSUM_SHA1, NNI_EVP, "sha1", NULL },
@@ -100,6 +111,24 @@ struct name_num_item valid_auth_checksums_items[] = {
 struct name_num_obj valid_auth_checksums = {
 	"daemon auth checksum", NULL, 0, 0, valid_auth_checksums_items
 };
+
+/* Return the strength rank (0 = strongest) of a daemon-auth digest by name in
+ * valid_auth_checksums_items[], which is listed strongest-first; -1 if the name
+ * is not a supported auth digest on this build.  Used by the daemon's
+ * "auth digest" floor to compare the negotiated digest against the minimum. */
+int auth_digest_rank(const char *name)
+{
+	struct name_num_item *nni;
+	int rank = 0;
+
+	if (!name || !*name)
+		return -1;
+	for (nni = valid_auth_checksums_items; nni->name; nni++, rank++) {
+		if (strcasecmp(nni->name, name) == 0)
+			return rank;
+	}
+	return -1;
+}
 
 /* These cannot make use of openssl, so they're marked just as built-in */
 struct name_num_item implied_checksum_md4 =
@@ -369,6 +398,54 @@ void get_checksum2(char *buf, int32 len, char *sum)
 		md5_result(&m5, (uchar *)sum);
 		break;
 	  }
+#ifdef XATTR_SUMS
+       case CSUM_SHA256:
+		{
+			struct sha256_ctx sha256;
+			uchar seedbuf[4];
+
+			sha256_init_ctx(&sha256);
+			if (proper_seed_order) {
+				if (checksum_seed) {
+					SIVALu(seedbuf, 0, checksum_seed);
+					sha256_process_bytes(seedbuf, 4, &sha256);
+				}
+				sha256_process_bytes((uchar *)buf, len, &sha256);
+			} else {
+				sha256_process_bytes((uchar *)buf, len, &sha256);
+				if (checksum_seed) {
+					SIVALu(seedbuf, 0, checksum_seed);
+					sha256_process_bytes(seedbuf, 4, &sha256);
+				}
+			}
+			sha256_finish_ctx(&sha256, (uchar *)sum);
+		}
+		break;
+
+       case CSUM_SHA512:
+		{
+			struct sha512_ctx sha512;
+			uchar seedbuf[4];
+
+			sha512_init_ctx(&sha512);
+			if (proper_seed_order) {
+				if (checksum_seed) {
+					SIVALu(seedbuf, 0, checksum_seed);
+					sha512_process_bytes(seedbuf, 4, &sha512);
+				}
+				sha512_process_bytes((uchar *)buf, len, &sha512);
+			} else {
+				sha512_process_bytes((uchar *)buf, len, &sha512);
+				if (checksum_seed) {
+					SIVALu(seedbuf, 0, checksum_seed);
+					sha512_process_bytes(seedbuf, 4, &sha512);
+				}
+			}
+			sha512_finish_ctx(&sha512, (uchar *)sum);
+		}
+		break;
+#endif /* XATTR_SUMS */
+
 	  case CSUM_MD4:
 	  case CSUM_MD4_OLD:
 	  case CSUM_MD4_BUSTED:
@@ -511,9 +588,6 @@ void file_checksum(const char *fname, const STRUCT_STAT *st_p, char *sum)
 			int				 _origin;
 
 			ai_get_checksums(fname, &_xattr_sums, &_origin);
-fprintf(stderr, "[DEBUG] MD5 = %s\n", _xattr_sums.MD5);
-fprintf(stderr, "sizeof(sum) = %4lu, length(MD5)    = %4lu\n", sizeof(sum),
-        strlen((char *) _xattr_sums.MD5));
 			strcpy(sum, (char *) _xattr_sums.MD5);
 		}
 	  	break;
@@ -524,9 +598,6 @@ fprintf(stderr, "sizeof(sum) = %4lu, length(MD5)    = %4lu\n", sizeof(sum),
 			int				 _origin;
 
 			ai_get_checksums(fname, &_xattr_sums, &_origin);
-fprintf(stderr, "[DEBUG] SHA256 = %s\n", _xattr_sums.SHA256);
-fprintf(stderr, "sizeof(sum) = %4lu, length(SHA256) = %4lu\n", sizeof(sum),
-        strlen((char *) _xattr_sums.SHA256));
 			strcpy(sum, (char *) _xattr_sums.SHA256);
 		}
 	  	break;
@@ -537,9 +608,6 @@ fprintf(stderr, "sizeof(sum) = %4lu, length(SHA256) = %4lu\n", sizeof(sum),
 			int				 _origin;
 
 			ai_get_checksums(fname, &_xattr_sums, &_origin);
-fprintf(stderr, "[DEBUG] SHA512 = %s\n", _xattr_sums.SHA512);
-fprintf(stderr, "sizeof(sum) = %4lu, length(SHA512) = %4lu\n", sizeof(sum),
-        strlen((char *) _xattr_sums.SHA512));
 			strcpy(sum, (char *) _xattr_sums.SHA512);
 		}
 	     break;
@@ -594,6 +662,12 @@ fprintf(stderr, "sizeof(sum) = %4lu, length(SHA512) = %4lu\n", sizeof(sum),
 
 static int32 sumresidue;
 static md_context ctx_md;
+
+#ifdef XATTR_SUMS
+static struct sha256_ctx ctx_sha256;
+static struct sha512_ctx ctx_sha512;
+#endif /* XATTR_SUMS */
+
 #ifdef SUPPORT_XXHASH
 static XXH64_state_t* xxh64_state;
 #endif
@@ -652,6 +726,16 @@ int sum_init(struct name_num_item *nni, int seed)
 	  case CSUM_MD5:
 		md5_begin(&ctx_md);
 		break;
+#ifdef XATTR_SUMS
+       case CSUM_SHA256:
+		sha256_init_ctx(&ctx_sha256);
+		break;
+
+       case CSUM_SHA512:
+		sha512_init_ctx(&ctx_sha512);
+		break;
+#endif /* XATTR_SUMS */
+
 	  case CSUM_MD4:
 		mdfour_begin(&ctx_md);
 		sumresidue = 0;
@@ -698,6 +782,16 @@ void sum_update(const char *p, int32 len)
 	  case CSUM_MD5:
 		md5_update(&ctx_md, (uchar *)p, len);
 		break;
+#ifdef XATTR_SUMS
+       case CSUM_SHA256:
+		sha256_process_bytes((uchar *)p, len, &ctx_sha256);
+		break;
+
+       case CSUM_SHA512:
+		sha512_process_bytes((uchar *)p, len, &ctx_sha512);
+		break;
+#endif /* XATTR_SUMS */
+
 	  case CSUM_MD4:
 	  case CSUM_MD4_OLD:
 	  case CSUM_MD4_BUSTED:
@@ -764,6 +858,16 @@ void sum_end(char *sum)
 	  case CSUM_MD5:
 		md5_result(&ctx_md, (uchar *)sum);
 		break;
+#ifdef XATTR_SUMS
+       case CSUM_SHA256:
+		sha256_finish_ctx(&ctx_sha256, sum);
+		break;
+
+       case CSUM_SHA512:
+		sha512_finish_ctx(&ctx_sha512, sum);
+		break;
+#endif /* XATTR_SUMS */
+
 	  case CSUM_MD4:
 	  case CSUM_MD4_OLD:
 		mdfour_update(&ctx_md, (uchar *)ctx_md.buffer, sumresidue);
