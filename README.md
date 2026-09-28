@@ -34,3 +34,11 @@ This version includes the management of checksums in trusted extended attributes
 ```
 
 This project uses **autotools** and linker flags like **-lcap** and **-lpthreads**.
+
+Packages you could need to install :
+
+``` bash
+# apt install -y autoconf automake
+# apt install -y curl gawk
+# apt install -y libxxhash-dev libzstd-dev liblz4-dev
+```
