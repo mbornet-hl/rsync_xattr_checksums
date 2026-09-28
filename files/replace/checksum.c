@@ -26,6 +26,7 @@
  * with this program; if not, visit the http://fsf.org website.
  */
 
+#include <config.h>
 #include "rsync.h"
 #ifdef XATTR_SUMS
 #include "gnulib/md5.h"
