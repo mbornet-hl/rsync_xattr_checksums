@@ -81,10 +81,10 @@
 #define AI_EXIT_ERR_STAT        (3)
 
 /* For debugging purposes */
-#define X                       if (G.debug) {\
+#define AI_X                    if (G.debug) {\
                                     fprintf(stderr, "%s(%3d) : %s()\n", __FILE__, __LINE__, __func__); \
                                 }
-#define Z                       { fprintf(stderr, "%s(%d) [%s()]\n", __FILE__, __LINE__, __func__); }
+#define AI_Z                    { fprintf(stderr, "%s(%d) [%s()]\n", __FILE__, __LINE__, __func__); }
 
 
 /* Namespace of the xattr */
