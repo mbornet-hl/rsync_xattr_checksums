@@ -29,9 +29,9 @@
 #include <config.h>
 #include "rsync.h"
 #ifdef XATTR_SUMS
-#include "gnulib/md5.h"
-#include "gnulib/sha256.h"
-#include "gnulib/sha512.h"
+#include "../gnulib.build/include/md5.h"
+#include "../gnulib.build/include/sha256.h"
+#include "../gnulib.build/include/sha512.h"
 #include "xattr_sums/ai_cpri.h"
 #include "xattr_sums/ai_epri.h"
 #endif
