@@ -347,8 +347,8 @@ enum delret {
 #include "config.h"
 
 #ifdef XATTR_SUMS
-#include "ai_cpri.h"
-#include "ai_epri.h"
+#include "xattr_sums/ai_cpri.h"
+#include "xattr_sums/ai_epri.h"
 #endif /* XATTR_SUMS */
 
 /* The default RSYNC_RSH is always set in config.h. */
