@@ -2,7 +2,7 @@
  *  Various definitions, types, ... for checksums in xattr
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_cpri.h   Version 1.16 du 26/09/26 - 
+ *   @(#) [Zen] ai_cpri.h   Version 1.17 du 26/09/28 -
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -34,7 +34,7 @@
 #define FALSE                   (0)
 #endif
 
-#if! defined(TRUE)
+#if ! defined(TRUE)
 #define TRUE                    (1)
 #endif
 
