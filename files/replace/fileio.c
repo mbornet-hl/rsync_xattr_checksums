@@ -20,9 +20,9 @@
  */
 
 #ifdef XATTR_SUMS
-#include "gnulib/md5.h"
-#include "gnulib/sha256.h"
-#include "gnulib/sha512.h"
+#include "../gnulib.build/include/md5.h"
+#include "../gnulib.build/sha256.h"
+#include "../gnulib.build/sha512.h"
 #include "xattr_sums/ai_cpri.h"
 #include "xattr_sums/ai_epri.h"
 #endif
