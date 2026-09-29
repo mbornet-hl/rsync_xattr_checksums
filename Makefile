@@ -66,7 +66,7 @@ FILES_DIR            ?= $(CURDIR)/files
 # Extension files (installed in rsync.dev/xattr_sums/); *.c files are compiled.
 XATTR_SUMS_FILES     ?= ai_cpri.h ai_epri.h ai_gpri.c ai_xattr.c ai_wrapper.h
 # rsync files to be replaced (paths relative to rsync.dev/).
-REPLACE_FILES        ?= usage.c rsync.h checksum.c
+REPLACE_FILES        ?= usage.c rsync.h checksum.c fileio.c
 
 # ---- Internal layout --------------------------------------------------------
 
