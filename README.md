@@ -29,7 +29,7 @@ Please see the rsync(1) and rsyncd.conf(5) manpages for full documentation.
 See https://rsync.samba.org/ for updates, bug reports, and answers
 
 This version includes the management of checksums in trusted extended attributes (for root).
-[Sep 27 2026 17:54:22]
+[Sep 30 2026 14:50:23]
 
 ```
 
