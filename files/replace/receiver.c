@@ -19,9 +19,8 @@
  * with this program; if not, visit the http://fsf.org website.
  */
 
-#include "config.h"
-
 #ifdef XATTR_SUMS
+#include "xattr_sums/ai_wrapper.h"
 #include "../gnulib.build/include/md5.h"
 #include "../gnulib.build/include/sha256.h"
 #include "../gnulib.build/include/sha512.h"
