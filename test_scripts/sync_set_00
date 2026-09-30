@@ -1,0 +1,13 @@
+#!/bin/bash
+
+xeq()
+{
+	echo "[DEBUG] $@"
+	time "$@"
+}
+
+TEST_DIR='/home/machine/mb/rsync.ALL/test_data/set_00'
+REMOTE_SRV=alpha
+
+xeq rsync -v -a -H -c --cc sha512 "$TEST_DIR/" $REMOTE_SRV:"$TEST_DIR"
+clush -w localhost,"$REMOTE_SRV" "checksums -Orv  $TEST_DIR"
