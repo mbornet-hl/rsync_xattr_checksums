@@ -20,6 +20,7 @@
  */
 
 #ifdef XATTR_SUMS
+#include "../gnulib.build/config.h"
 #include "../gnulib.build/include/md5.h"
 #include "../gnulib.build/include/sha256.h"
 #include "../gnulib.build/include/sha512.h"
