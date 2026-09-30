@@ -6,7 +6,7 @@ xeq()
 	time "$@"
 }
 
-TEST_DIR='/home/machine/mb/test_data/set_02'
+TEST_DIR='/home/machine/mb/test_data/set_04'
 REMOTE_SRV=alpha
 
 xeq rsync -v -a -H -c --cc sha512 "$TEST_DIR/" $REMOTE_SRV:"$TEST_DIR"
