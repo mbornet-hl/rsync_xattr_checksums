@@ -19,6 +19,8 @@
  * with this program; if not, visit the http://fsf.org website.
  */
 
+#include "config.h"
+
 #ifdef XATTR_SUMS
 #include "../gnulib.build/config.h"
 #include "../gnulib.build/include/md5.h"
